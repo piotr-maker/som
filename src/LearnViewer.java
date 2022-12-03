@@ -11,13 +11,16 @@ import javax.swing.Timer;
 
 public class LearnViewer extends JComponent {
 	private static final long serialVersionUID = 1L;
+	private ViewerListener listener;
 	private BufferedImage image;
 	private Timer timer;
 	private int width;
 	private int height;
 	private SOM som;
+	private double finishTreshold = 0.15;
 
-	public LearnViewer(int width, int height) {
+	public LearnViewer(ViewerListener listener, int width, int height) {
+		this.listener = listener;
 		this.width = width;
 		this.height = height;
 
@@ -31,6 +34,10 @@ public class LearnViewer extends JComponent {
 	
 	public void setBufferedImage(BufferedImage image) {
 		this.image = image;
+	}
+	
+	public void setFinishTreshold(double treshold) {
+		finishTreshold = treshold;
 	}
 	
 	public void setSOM(SOM som) {
@@ -59,11 +66,19 @@ public class LearnViewer extends JComponent {
 
 		if(timer.isRunning()) {
 			Random r=new Random();
-			double a=(r.nextDouble()-0.5)/0.5;
-			double b=(r.nextDouble()-0.5)/0.5;
+			double a=r.nextDouble();
+			double b=r.nextDouble();
 
-			Vec2D wejscia=new Vec2D(a,b);
-			som.ucz(wejscia);
+			int rgb = image.getRGB((int)(a * image.getWidth()), (int)(b * image.getHeight()));
+			if((rgb & 0x00FFFFFF) != 0x00FFFFFF) {
+				a = (a - 0.5) * 2;
+				b = (b - 0.5) * 2;
+				Vec2D wejscia=new Vec2D(a,b);
+				som.ucz(wejscia);
+				if(som.getEta() < finishTreshold) {
+					listener.viewFinished();
+				}
+			}
 			
 			super.paintComponent(g);
 		}

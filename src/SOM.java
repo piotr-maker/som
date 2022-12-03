@@ -7,12 +7,14 @@ public class SOM {
 	Vec2D [][] neurony;
 	double eta, epsEta;
 	double S, epsS;
+	int w, h;
 	
 	public SOM(){
 		neurony=null;
 		eta=0.0;
 	}
 	public SOM(int w,int h,double aeta,double aepsEta,double aepsS){
+		this.w = w; this.h = h;
 		eta=aeta; epsEta=aepsEta;
 		S=Math.sqrt(w*h);
 		epsS=aepsS;
@@ -81,6 +83,17 @@ public class SOM {
 		eta*=epsEta;
 		S*=epsS;
 	}
+	
+	public void config(double aeta,double aepsEta,double aepsS) {
+		eta=aeta; epsEta=aepsEta;
+		S=Math.sqrt(w*h);
+		epsS=aepsS;
+	}
+	
+	public double getEta() {
+		return eta;
+	}
+	
 	public double fS(double d){
 		return 1.0-d/S;
 	}

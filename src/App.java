@@ -22,8 +22,9 @@ enum Shape {
 	RECT, CIRCLE, TRIANGLE
 }
 
-public class App extends JFrame{
+public class App extends JFrame implements ViewerListener {
 	private static final long serialVersionUID = 1L;
+	private int currentImageNum = 0;
 	private SOM som;
 	private LearnViewer viewer;
 	private ImageViewer leftImage;
@@ -35,10 +36,10 @@ public class App extends JFrame{
 
 	// Ustawienia sieci
 	final int NET_ROWS = 5;
-	final int NET_COLS = NET_ROWS;
-	final double ETA = 0.1;
-	final double EPS_ETA = 0.999;
-	final double EPS_S = 0.999;
+	final int NET_COLS = 4;
+	final double ETA = 0.35;
+	final double EPS_ETA = 0.997;
+	final double EPS_S = 0.995;
 	
 	// Rozmiary obiektów
 	final int MARGIN = 40;
@@ -162,10 +163,8 @@ public class App extends JFrame{
 		
 		leftImage = new ImageViewer(VIEWER_WIDTH, VIEWER_HEIGHT);
 		rightImage = new ImageViewer(VIEWER_WIDTH, VIEWER_HEIGHT);
-		viewer = new LearnViewer(VIEWER_WIDTH, VIEWER_HEIGHT);
+		viewer = new LearnViewer(this, VIEWER_WIDTH, VIEWER_HEIGHT);
 		reloadImages();
-
-		//som=new SOM(20,20,0.1,0.999,0.999);
 
 		JButton startButton = new JButton("Start");
 		startButton.addActionListener(new ActionListener() {
@@ -187,7 +186,21 @@ public class App extends JFrame{
 		setVisible(true);
 	}
 	
+	@Override
+	public void viewFinished() {
+		currentImageNum++;
+		if(currentImageNum <= 1) {
+			viewer.stop();
+			som.config(ETA, EPS_ETA, EPS_S);
+			viewer.setBufferedImage(rightImage.getImage());
+			viewer.start();
+		} else {
+			viewer.stop();
+		}
+	}
+	
 	protected void reloadImages() {
+		currentImageNum = 0;
 		String folder = filling.toString().toLowerCase();
 		String name1 = shapeFirst.toString().toLowerCase();
 		String name2 = shapeSecond.toString().toLowerCase();
@@ -198,8 +211,10 @@ public class App extends JFrame{
 		rightImage.repaint();
 		
 		if(filling == Filling.FILLED) {
-			som = new SOM(NET_ROWS, NET_COLS, ETA, EPS_ETA, EPS_S);
+			viewer.setFinishTreshold(0.1);
+			som = new SOM(NET_ROWS, NET_COLS, ETA+0.1, EPS_ETA, EPS_S);
 		} else {
+			viewer.setFinishTreshold(0.18);
 			som = new SOM(NET_ROWS * NET_COLS, 1 , ETA, EPS_ETA, EPS_S);	
 		}
 		viewer.stop();
