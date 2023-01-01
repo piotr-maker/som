@@ -30,11 +30,17 @@ public class SOM {
 			}
 	}
 	public void draw(Graphics g,int x0,int y0,int w,int h){
+		int x = 0, y = 0;
+		int beginX = 0, beginY = 0;
 
-		for(int i=0;i<neurony.length;i++)
+		for(int i=0;i<neurony.length;i++) {
 			for(int j=0;j<neurony[i].length;j++){
-				int x=w2x(x0,w,neurony[i][j]);
-				int y=w2y(y0,h,neurony[i][j]);
+				x=w2x(x0,w,neurony[i][j]);
+				y=w2y(y0,h,neurony[i][j]);
+				if((i == 0) && (j == 0)) {
+					beginX = x;
+					beginY = y;
+				}
 				int x1,y1;
 				g.setColor(Color.BLUE);
 				if(i+1<neurony.length){
@@ -50,6 +56,12 @@ public class SOM {
 				g.setColor(Color.RED);
 				g.fillOval(x-3, y-3, 6, 6);
 			}
+		}
+		
+		if(this.w == 1) {
+			g.setColor(Color.BLUE);
+			g.drawLine(x, y, beginX, beginY);
+		}
 	}
 	public int w2x(int a,int b,Vec2D v){
 		return a+(int)Math.round(b*(v.x+1.0)/2.0);
