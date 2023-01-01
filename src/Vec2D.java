@@ -4,6 +4,11 @@ public class Vec2D {
 	public Vec2D(){
 		x=y=0;
 	}
+	
+	public static double distance(Vec2D a, Vec2D b) {
+		return Math.pow(a.x-b.x,2.0)+Math.pow(a.y-b.y,2.0);
+	}
+	
 	public Vec2D(double ax,double ay){
 		x=ax; y=ay;
 	}

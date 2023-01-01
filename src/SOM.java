@@ -8,7 +8,7 @@ public class SOM {
 	double eta, epsEta;
 	double S, epsS;
 	int w, h;
-	
+
 	public SOM(){
 		neurony=null;
 		eta=0.0;
@@ -30,7 +30,7 @@ public class SOM {
 			}
 	}
 	public void draw(Graphics g,int x0,int y0,int w,int h){
-		
+
 		for(int i=0;i<neurony.length;i++)
 			for(int j=0;j<neurony[i].length;j++){
 				int x=w2x(x0,w,neurony[i][j]);
@@ -57,47 +57,82 @@ public class SOM {
 	public int w2y(int a,int b,Vec2D v){
 		return a+(int)Math.round(b*(v.y+1.0)/2.0);
 	}
-	public void ucz(Vec2D wejscia){
+	public void learn(Vec2D input){
+		int [] winner = findWinner(input);
+		if(w == 1)
+			correctStringWeights(winner, input);
+		else
+			correctWeights(winner, input);
+		eta*=epsEta;
+		S*=epsS;
+	}
+
+	protected void correctStringWeights(int [] winner, Vec2D input) {
+		int idxW = winner[0];
+		double d=0.0;
+		int SS=(int)S;
+		int idX;
+
+		for(int i=idxW-SS;i<=idxW+SS;i++) {
+			if(i != 0) {
+				d = Math.abs(idxW - i);
+				idX = i < 0 ? neurony.length + i : i % neurony.length;
+				neurony[idX][0].add(Vec2D.sub(input, neurony[idX][0]).mul(eta).mul(fS(d)));
+			}
+		}
+	}
+
+	protected void correctWeights(int [] winner, Vec2D input) {
+		int idxW = winner[0];
+		int idxK = winner[1];
+		double d=0.0;
+		int SS=(int)S;
+
+		for(int i=idxW-SS;i<=idxW+SS;i++) {
+			if(i>=0 && i<neurony.length) {
+				for(int j=idxK-SS;j<=idxK+SS;j++) {
+					if(j>=0 && j<neurony[i].length){
+						d=Math.sqrt(Math.pow(idxW-i, 2.0)+Math.pow(idxK-j, 2.0));
+						if(d<S) {
+							neurony[i][j].add(Vec2D.sub(input, neurony[i][j]).mul(eta).mul(fS(d)));
+						}
+					}
+				}
+			}
+		}
+		//neurony[idxW][idxK].add(Vec2D.sub(wejscia,neurony[idxW][idxK]).mul(eta).mul(fS(d)));
+	}
+
+	protected int[] findWinner(Vec2D input) {
+		int [] result = new int[2];
 		int idxW=0,idxK=0;
-		double minDist=dist2(neurony[idxW][idxK],wejscia);
-		for(int i=0;i<neurony.length;i++)
+		double minDist=Vec2D.distance(neurony[idxW][idxK],input);
+		for(int i=0;i<neurony.length;i++) {
 			for(int j=0;j<neurony[i].length;j++){
-				double dist=dist2(neurony[i][j],wejscia);
+				double dist=Vec2D.distance(neurony[i][j],input);
 				if(dist<minDist){
 					idxW=i;
 					idxK=j;
 					minDist=dist;
 				}
 			}
-		double d=0.0;
-		int SS=(int)S;
-		for(int i=idxW-SS;i<=idxW+SS;i++)
-			if(i>=0 && i<neurony.length)
-				for(int j=idxK-SS;j<=idxK+SS;j++)
-					if(j>=0 && j<neurony[i].length){
-						d=Math.sqrt(Math.pow(idxW-i, 2.0)+Math.pow(idxK-j, 2.0));
-						if(d<S)
-							neurony[i][j].add(Vec2D.sub(wejscia,neurony[i][j]).mul(eta).mul(fS(d)));
-					}
-		//neurony[idxW][idxK].add(Vec2D.sub(wejscia,neurony[idxW][idxK]).mul(eta).mul(fS(d)));
-		eta*=epsEta;
-		S*=epsS;
+		}
+		result[0] = idxW;
+		result[1] = idxK;
+		return result;
 	}
-	
+
 	public void config(double aeta,double aepsEta,double aepsS) {
 		eta=aeta; epsEta=aepsEta;
 		S=Math.sqrt(w*h);
 		epsS=aepsS;
 	}
-	
+
 	public double getEta() {
 		return eta;
 	}
-	
+
 	public double fS(double d){
 		return 1.0-d/S;
-	}
-	public double dist2(Vec2D a,Vec2D b){
-		return Math.pow(a.x-b.x,2.0)+Math.pow(a.y-b.y,2.0);
 	}
 }

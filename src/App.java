@@ -215,7 +215,7 @@ public class App extends JFrame implements ViewerListener {
 			som = new SOM(NET_ROWS, NET_COLS, ETA+0.1, EPS_ETA, EPS_S);
 		} else {
 			viewer.setFinishTreshold(0.18);
-			som = new SOM(NET_ROWS * NET_COLS, 1 , ETA, EPS_ETA, EPS_S);	
+			som = new SOM(1, NET_ROWS * NET_COLS, ETA, EPS_ETA, EPS_S);	
 		}
 		viewer.stop();
 		viewer.setSOM(som);

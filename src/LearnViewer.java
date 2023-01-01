@@ -74,7 +74,7 @@ public class LearnViewer extends JComponent {
 				a = (a - 0.5) * 2;
 				b = (b - 0.5) * 2;
 				Vec2D wejscia=new Vec2D(a,b);
-				som.ucz(wejscia);
+				som.learn(wejscia);
 				if(som.getEta() < finishTreshold) {
 					listener.viewFinished();
 				}
