@@ -29,7 +29,7 @@ public class App extends JFrame implements ViewerListener {
 	private LearnViewer viewer;
 	private ImageViewer leftImage;
 	private ImageViewer rightImage;
-	
+
 	Filling filling = Filling.EMPTY;
 	Shape shapeFirst = Shape.RECT;
 	Shape shapeSecond = Shape.CIRCLE;
@@ -40,11 +40,13 @@ public class App extends JFrame implements ViewerListener {
 	final double ETA = 0.35;
 	final double EPS_ETA = 0.997;
 	final double EPS_S = 0.995;
-	
+
 	// Rozmiary obiektów
 	final int MARGIN = 40;
 	final int VIEWER_WIDTH = 250;
 	final int VIEWER_HEIGHT = VIEWER_WIDTH;
+	
+	JButton startButton;
 
 	public App(String string) {
 		super(string);
@@ -160,21 +162,27 @@ public class App extends JFrame implements ViewerListener {
 		menu_bar.add(menu);
 
 		setJMenuBar(menu_bar);
-		
+
 		leftImage = new ImageViewer(VIEWER_WIDTH, VIEWER_HEIGHT);
 		rightImage = new ImageViewer(VIEWER_WIDTH, VIEWER_HEIGHT);
 		viewer = new LearnViewer(this, VIEWER_WIDTH, VIEWER_HEIGHT);
-		reloadImages();
 
-		JButton startButton = new JButton("Start");
+		startButton = new JButton("Start");
 		startButton.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				viewer.start();
+				if(startButton.getText() == "Play") {
+					viewer.start();
+					startButton.setText("Pause");
+				} else {
+					viewer.stop();
+					startButton.setText("Play");
+				}
 			}
 		});
-		
+
+		reloadImages();
 		JPanel panel = new JPanel(new GridLayout(1, 3));
 		panel.add(leftImage);
 		panel.add(viewer);
@@ -185,20 +193,23 @@ public class App extends JFrame implements ViewerListener {
 		add(startButton, BorderLayout.SOUTH);
 		setVisible(true);
 	}
-	
+
 	@Override
 	public void viewFinished() {
 		currentImageNum++;
-		if(currentImageNum <= 1) {
+		if(currentImageNum % 2 == 1) {
 			viewer.stop();
 			som.config(ETA, EPS_ETA, EPS_S);
 			viewer.setBufferedImage(rightImage.getImage());
 			viewer.start();
 		} else {
 			viewer.stop();
+			som.config(ETA, EPS_ETA, EPS_S);
+			viewer.setBufferedImage(leftImage.getImage());
+			viewer.start();
 		}
 	}
-	
+
 	protected void reloadImages() {
 		currentImageNum = 0;
 		String folder = filling.toString().toLowerCase();
@@ -209,7 +220,7 @@ public class App extends JFrame implements ViewerListener {
 		leftImage.repaint();
 		rightImage.load("./img/" + folder + "/" + name2 + ".png");
 		rightImage.repaint();
-		
+
 		if(filling == Filling.FILLED) {
 			viewer.setFinishTreshold(0.1);
 			som = new SOM(NET_ROWS, NET_COLS, ETA+0.1, EPS_ETA, EPS_S);
@@ -221,11 +232,12 @@ public class App extends JFrame implements ViewerListener {
 		viewer.setSOM(som);
 		viewer.setBufferedImage(leftImage.getImage());
 		viewer.repaint();
+		startButton.setText("Play");
 	}
-	
+
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				new App("SOM application");
