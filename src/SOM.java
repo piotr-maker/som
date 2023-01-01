@@ -57,7 +57,7 @@ public class SOM {
 				g.fillOval(x-3, y-3, 6, 6);
 			}
 		}
-		
+
 		if(this.w == 1) {
 			g.setColor(Color.BLUE);
 			g.drawLine(x, y, beginX, beginY);
@@ -86,11 +86,9 @@ public class SOM {
 		int idX;
 
 		for(int i=idxW-SS;i<=idxW+SS;i++) {
-			if(i != 0) {
-				d = Math.abs(idxW - i);
-				idX = i < 0 ? neurony.length + i : i % neurony.length;
-				neurony[idX][0].add(Vec2D.sub(input, neurony[idX][0]).mul(eta).mul(fS(d)));
-			}
+			d = Math.abs(idxW - i);
+			idX = i < 0 ? neurony.length + i : i % neurony.length;
+			neurony[idX][0].add(Vec2D.sub(input, neurony[idX][0]).mul(eta).mul(fS(d)));
 		}
 	}
 
