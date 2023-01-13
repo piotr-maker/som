@@ -15,9 +15,7 @@ public class SOM {
 	}
 	public SOM(int w,int h,double aeta,double aepsEta,double aepsS){
 		this.w = w; this.h = h;
-		eta=aeta; epsEta=aepsEta;
-		S=Math.sqrt(w*h);
-		epsS=aepsS;
+		config(true, eta, epsEta, epsS);
 		neurony=new Vec2D[h][];
 		for(int i=0;i<h;i++)
 			neurony[i]=new Vec2D[w];
@@ -132,9 +130,10 @@ public class SOM {
 		return result;
 	}
 
-	public void config(double aeta,double aepsEta,double aepsS) {
+	public void config(boolean mesh, double aeta,double aepsEta,double aepsS) {
+		double subtract = mesh == true ? 1.5 : 0.0;
 		eta=aeta; epsEta=aepsEta;
-		S=Math.sqrt(w*h);
+		S=Math.sqrt(w*h) - subtract;
 		epsS=aepsS;
 	}
 

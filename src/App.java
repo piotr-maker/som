@@ -39,7 +39,10 @@ public class App extends JFrame implements ViewerListener {
 	final int NET_COLS = 4;
 	final double ETA = 0.35;
 	final double EPS_ETA = 0.997;
-	final double EPS_S = 0.995;
+	final double MESH_EPS_S = 0.99;
+	final double STRING_EPS_S = 0.995;
+	final double MESH_TRESHOLD = 0.18;
+	final double STRING_TRESHOLD = 0.22;
 
 	// Rozmiary obiektów
 	final int MARGIN = 40;
@@ -167,7 +170,7 @@ public class App extends JFrame implements ViewerListener {
 		rightImage = new ImageViewer(VIEWER_WIDTH, VIEWER_HEIGHT);
 		viewer = new LearnViewer(this, VIEWER_WIDTH, VIEWER_HEIGHT);
 
-		startButton = new JButton("Start");
+		startButton = new JButton("Play");
 		startButton.addActionListener(new ActionListener() {
 
 			@Override
@@ -182,7 +185,6 @@ public class App extends JFrame implements ViewerListener {
 			}
 		});
 
-		reloadImages();
 		JPanel panel = new JPanel(new GridLayout(1, 3));
 		panel.add(leftImage);
 		panel.add(viewer);
@@ -191,27 +193,34 @@ public class App extends JFrame implements ViewerListener {
 		add(Box.createVerticalStrut(MARGIN), BorderLayout.NORTH);
 		add(panel, BorderLayout.CENTER);
 		add(startButton, BorderLayout.SOUTH);
+		reloadImages();
 		setVisible(true);
 	}
 
 	@Override
 	public void viewFinished() {
+		double epsS = filling == Filling.FILLED ? MESH_EPS_S : STRING_EPS_S;
+		double treshold = filling == Filling.FILLED ? MESH_TRESHOLD : STRING_TRESHOLD;
+		
+		boolean higherS = !((filling != Filling.FILLED) && (currentImageNum == -1));  
 		currentImageNum++;
 		if(currentImageNum % 2 == 1) {
 			viewer.stop();
-			som.config(ETA, EPS_ETA, EPS_S);
+			viewer.setFinishTreshold(treshold);
+			som.config(higherS, ETA, EPS_ETA, epsS);
 			viewer.setBufferedImage(rightImage.getImage());
 			viewer.start();
 		} else {
 			viewer.stop();
-			som.config(ETA, EPS_ETA, EPS_S);
+			viewer.setFinishTreshold(treshold);
+			som.config(higherS, ETA, EPS_ETA, epsS);
 			viewer.setBufferedImage(leftImage.getImage());
 			viewer.start();
 		}
 	}
 
 	protected void reloadImages() {
-		currentImageNum = 0;
+		currentImageNum = -1;
 		String folder = filling.toString().toLowerCase();
 		String name1 = shapeFirst.toString().toLowerCase();
 		String name2 = shapeSecond.toString().toLowerCase();
@@ -220,18 +229,16 @@ public class App extends JFrame implements ViewerListener {
 		leftImage.repaint();
 		rightImage.load("./img/" + folder + "/" + name2 + ".png");
 		rightImage.repaint();
+		viewer.stop();
 
 		if(filling == Filling.FILLED) {
-			viewer.setFinishTreshold(0.1);
-			som = new SOM(NET_ROWS, NET_COLS, ETA+0.1, EPS_ETA, EPS_S);
+			som = new SOM(NET_ROWS, NET_COLS, ETA, EPS_ETA, MESH_EPS_S);
 		} else {
-			viewer.setFinishTreshold(0.18);
-			som = new SOM(1, NET_ROWS * NET_COLS, ETA, EPS_ETA, EPS_S);	
+			som = new SOM(1, NET_ROWS * NET_COLS, ETA, EPS_ETA, MESH_EPS_S);
 		}
-		viewer.stop();
 		viewer.setSOM(som);
-		viewer.setBufferedImage(leftImage.getImage());
 		viewer.repaint();
+		viewer.setBufferedImage(leftImage.getImage());
 		startButton.setText("Play");
 	}
 

@@ -23,6 +23,7 @@ public class LearnViewer extends JComponent {
 		this.listener = listener;
 		this.width = width;
 		this.height = height;
+		this.image = null;
 
 		timer = new Timer(20,new ActionListener() {
 			@Override
@@ -75,7 +76,8 @@ public class LearnViewer extends JComponent {
 				b = (b - 0.5) * 2;
 				Vec2D wejscia=new Vec2D(a,b);
 				som.learn(wejscia);
-				if(som.getEta() < finishTreshold) {
+				if((som.getEta() < finishTreshold)) {
+				//if((som.getEta() < finishTreshold) && (som.getEta() != 0.0)) {
 					listener.viewFinished();
 				}
 			}
