@@ -34,15 +34,22 @@ public class App extends JFrame implements ViewerListener {
 	Shape shapeFirst = Shape.RECT;
 	Shape shapeSecond = Shape.CIRCLE;
 
-	// Ustawienia sieci
-	final int NET_ROWS = 5;
-	final int NET_COLS = 4;
 	final double ETA = 0.35;
-	final double EPS_ETA = 0.997;
-	final double MESH_EPS_S = 0.99;
-	final double STRING_EPS_S = 0.995;
-	final double MESH_TRESHOLD = 0.18;
-	final double STRING_TRESHOLD = 0.22;
+
+	// Ustawienia sieci dla łańcucha
+	final int STRING_POINTS = 25;
+	final double STRING_S = Math.sqrt(STRING_POINTS);
+	final double STRING_EPS_ETA = 0.997;
+	final double STRING_EPS_S = 0.996;
+	final double STRING_TRESHOLD = 0.04;
+	
+	// Ustawienia sieci dla siatki
+	final int NET_ROWS = 10;
+	final int NET_COLS = 10;
+	final double MESH_S = Math.sqrt(NET_ROWS * NET_COLS) - 4;
+	final double MESH_EPS_S = 0.997;
+	final double MESH_EPS_ETA = 0.999;
+	final double MESH_TRESHOLD = 0.06;
 
 	// Rozmiary obiektów
 	final int MARGIN = 40;
@@ -199,21 +206,22 @@ public class App extends JFrame implements ViewerListener {
 
 	@Override
 	public void viewFinished() {
+		double S = filling == Filling.FILLED ? MESH_S : STRING_S;
 		double epsS = filling == Filling.FILLED ? MESH_EPS_S : STRING_EPS_S;
+		double epsEta = filling == Filling.FILLED ? MESH_EPS_ETA : STRING_EPS_ETA;
 		double treshold = filling == Filling.FILLED ? MESH_TRESHOLD : STRING_TRESHOLD;
-		
-		boolean higherS = !((filling != Filling.FILLED) && (currentImageNum == -1));  
+
 		currentImageNum++;
 		if(currentImageNum % 2 == 1) {
 			viewer.stop();
 			viewer.setFinishTreshold(treshold);
-			som.config(higherS, ETA, EPS_ETA, epsS);
+			som.config(S, ETA, epsEta, epsS);
 			viewer.setBufferedImage(rightImage.getImage());
 			viewer.start();
 		} else {
 			viewer.stop();
 			viewer.setFinishTreshold(treshold);
-			som.config(higherS, ETA, EPS_ETA, epsS);
+			som.config(S, ETA, epsEta, epsS);
 			viewer.setBufferedImage(leftImage.getImage());
 			viewer.start();
 		}
@@ -232,9 +240,9 @@ public class App extends JFrame implements ViewerListener {
 		viewer.stop();
 
 		if(filling == Filling.FILLED) {
-			som = new SOM(NET_ROWS, NET_COLS, ETA, EPS_ETA, MESH_EPS_S);
+			som = new SOM(NET_ROWS, NET_COLS, ETA, MESH_EPS_ETA, MESH_EPS_S);
 		} else {
-			som = new SOM(1, NET_ROWS * NET_COLS, ETA, EPS_ETA, MESH_EPS_S);
+			som = new SOM(1, STRING_POINTS, ETA, STRING_EPS_ETA, MESH_EPS_S);
 		}
 		viewer.setSOM(som);
 		viewer.repaint();

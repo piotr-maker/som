@@ -25,7 +25,7 @@ public class LearnViewer extends JComponent {
 		this.height = height;
 		this.image = null;
 
-		timer = new Timer(20,new ActionListener() {
+		timer = new Timer(2,new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				repaint();
